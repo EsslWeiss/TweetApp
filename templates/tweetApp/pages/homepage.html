@@ -1,0 +1,20 @@
+{% extends 'tweetApp/bases/basepage.html' %}
+{% load static %}
+
+{% block title %}my tweets{% endblock title %}
+
+{% block content %}
+
+  <div id="tweets_list">
+
+	  <div align="center"><button id="load_tweets">Load tweets</button></div>
+
+  </div>
+
+{% endblock content %}
+
+{% block load_scripts %}
+	
+	<script src="{% static 'js/tweets_list_porcessing.js' %}"></script>
+
+{% endblock load_scripts %}

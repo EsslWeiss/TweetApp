@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import loader
 from django.http import HttpResponse, JsonResponse
+from django.utils.http import is_safe_url
+from django.urls import reverse
+from django.conf import settings
 
 from .models import Tweet
 from .forms import TweetForm
@@ -34,14 +37,21 @@ def tweets_list_view(request, *args, **kwargs):
 
 def tweet_create_view(request, *args, **kwargs):
     ipdb.set_trace()
-    tweet_form = TweetForm(request.POST or None)
-    if tweet_form.is_valid():
-        tweet_obj = tweet_form.save(commit=False)
-        tweet_obj.save()
-        tweet_form = TweetForm(instance=tweet_obj)
+    if request.method == "POST":
+        to_next_page = request.POST['to_next_page']
+        tweet_form = TweetForm({'text_content': request.POST['text_content']})
 
-    context = {'tweet_form': tweet_form}
-    return render(request, 
-            'tweetApp/pages/components/create_tweet_form.html', 
-            context)
+        if tweet_form.is_valid():
+            tweet_obj = tweet_form.save(commit=False)
+            tweet_obj.save()
+            if is_safe_url(to_next_page, settings.ALLOWED_HOSTS):
+                return redirect(to_next_page)
+
+            return redirect(reverse('tweetApp:tweets-list'))
+    else:
+        tweet_form = TweetForm(initial={'to_next_page': reverse('tweetApp:tweets-list')})
+
+    return render(request,
+        'tweetApp/pages/components/create_tweet_form.html', 
+        {'tweet_form': tweet_form})
 

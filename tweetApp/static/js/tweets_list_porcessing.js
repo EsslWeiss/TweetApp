@@ -14,6 +14,8 @@ function likeBtn(tweet) {
 document.getElementById('load_tweets').addEventListener(
 	'click', () => {
 		let tweetsBar = document.getElementById('tweets_list');
+		let tweetFormContainer = document.getElementById('tweet-form-container')
+		let tweetForm = document.getElementById('tweet-form');
 
 		let xhr = new XMLHttpRequest();
 		xhr.responseType = 'json';
@@ -23,12 +25,12 @@ document.getElementById('load_tweets').addEventListener(
 			let tweetsList = '';
 
 			let elem = document.getElementsByTagName('input')
-			console.log(elem);
 
 			for(let t in tweets) {
 				tweetsList += '<p align="center"><b>' + tweets[t].content + '</b> ' + likeBtn(tweets[t]) + '</p>';
 			}
-			tweetsBar.innerHTML = tweetsList;	
+			tweetsBar.innerHTML = tweetsList;
+			tweetFormContainer.innerHTML = tweetForm;
 		}
 		xhr.send();
 	}

@@ -13,10 +13,19 @@ class TweetForm(forms.ModelForm):
     class Meta:
         model = Tweet
         fields = ('text_content', )
-
+        
     def __init__(self, *args, **kwargs):
         # kwargs = {'initial': {'to_next_page': 'url_to_next_page'}}
         super().__init__(*args, **kwargs)
+        self.fields['text_content'].widget.attrs.update(
+                {
+                    'id': 'textContentInput',
+                    'required': 'required'
+                }
+            )
+        self.fields['to_next_page'].widget.attrs.update(
+                {'id': 'toNextPageInput'}
+            )
 
     def clean_text_content(self):
         tweet = self.cleaned_data.get('text_content')

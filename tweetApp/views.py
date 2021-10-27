@@ -9,7 +9,7 @@ from django.conf import settings
 
 from .models import Tweet
 from .forms import TweetForm
-from .services import TweetService
+from .services import (TweetsCollection, TweetCreator)
 
 import ipdb
 
@@ -17,6 +17,7 @@ import ipdb
 class TweetsHomePage(View):
     template = 'tweetApp/pages/homepage.html' 
     form = TweetForm
+    model = Tweet
 
     def get(self, request, *args, **kwargs):
         tweet_form = self.form(
@@ -31,21 +32,18 @@ class TweetsHomePage(View):
 
     def post(self, request, *args, **kwargs):
         to_next_page = request.POST['to_next_page']
-        tweet_form = self.form({'text_content': request.POST['text_content']})
-        if tweet_form.is_valid():
-            tweet_obj = tweet_form.save(commit=False)
-            tweet_obj.save()
-            if is_safe_url(to_next_page, settings.ALLOWED_HOSTS):
-                return redirect(to_next_page, status=200)
-            
-            return redirect(reverse('tweetApp:tweets-homepage'))
+        tweet_obj = TweetCreator(model=self.model)\
+                .create_tweet(post_data=request.POST, form=self.form)
+        if tweet_obj:
+            tweet = TweetsCollection(model=Tweet).get_tweet_by_format(tweet_obj)
+            return JsonResponse(tweet)
 
 
 class TweetsListView(ListView):
     model = Tweet
 
     def get(self, request, *args, **kwargs):
-        t_serv = TweetService(model=self.model)
-        tweets_list = t_serv.get_tweets_list()
-        return JsonResponse(tweets_list)
+        t_coll = TweetsCollection(model=self.model)
+        t_list = t_coll.get_tweets_list()
+        return JsonResponse(t_list)
 

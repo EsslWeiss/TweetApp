@@ -1,8 +1,8 @@
 
-<form id="tweet-form" method="POST" action={% url 'tweetApp:tweets-homepage' %}>
+<form id="tweet-form" method="POST">
 	{% csrf_token %}
 	{{ tweet_form.as_p }}
 	
-	<button type="submit" class="btn btn-secondary">Tweet!</button>
+	<button id="sendButton" type="submit" class="btn btn-secondary">Tweet!</button>
 </form>
 

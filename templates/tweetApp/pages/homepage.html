@@ -6,18 +6,14 @@
 {% block content %}
 
 
-	<div id="tweet-form-container" align="center">
-		{% include 'tweetApp/pages/components/create_tweet_form.html' %}
-	</div><br><br>
+  <div id="tweet-form-container" align="center">
+	{% include 'tweetApp/pages/components/create_tweet_form.html' %}
+  </div><br><br>
 
-  <div id="tweets_list">
-
-
-
-	<div align="center">
-		<button id="load_tweets">Load tweets</button>
-	</div>
-
+  <div id="tweets-list"></div>
+  
+  <div align="center">
+	<button id="load-tweets">Load tweets</button>
   </div>
 
 {% endblock content %}
@@ -25,5 +21,6 @@
 {% block load_scripts %}
 	
 	<script src="{% static 'js/tweets_list_porcessing.js' %}"></script>
+	<script src="{% static 'js/ajax_tweetform_processing.js' %}"></script>
 
 {% endblock load_scripts %}

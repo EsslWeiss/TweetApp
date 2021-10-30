@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.http import is_safe_url
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.conf import settings
 
 from .models import Tweet
@@ -18,11 +18,22 @@ class TweetsHomePage(View):
     template = 'tweetApp/pages/homepage.html' 
     form = TweetForm
     model = Tweet
+    to_next_page = reverse_lazy('tweetApp:tweets-homepage')
+
+    def not_ajax_request(self, request, is_valid, form=None):
+        if is_valid:
+            return redirect(self.to_next_page)
+        else:
+            # else form is invalid. return form with errors.
+            return render(
+                    request, 
+                    self.template, 
+                    context={'tweet_form': form},
+                    status=200
+                )
 
     def get(self, request, *args, **kwargs):
-        tweet_form = self.form(
-                initial={'to_next_page': reverse('tweetApp:tweets-homepage')}
-            )
+        tweet_form = self.form()
         return render(
                 request, 
                 self.template,
@@ -31,12 +42,22 @@ class TweetsHomePage(View):
             )
 
     def post(self, request, *args, **kwargs):
-        to_next_page = request.POST['to_next_page']
-        tweet_obj = TweetCreator(model=self.model)\
+        response = TweetCreator(model=self.model)\
                 .create_tweet(post_data=request.POST, form=self.form)
-        if tweet_obj:
-            tweet = TweetsCollection(model=Tweet).get_tweet_by_format(tweet_obj)
-            return JsonResponse(tweet)
+        if response.is_valid:
+            tweet = TweetsCollection(model=self.model)\
+                    .get_tweet_by_format(response.object)
+            if request.is_ajax():
+                return JsonResponse(tweet, status=201)
+        if response.errors:
+            if request.is_ajax():
+                return JsonResponse(response.errors, status=400)
+        
+        return self.not_ajax_request(
+                request, 
+                is_valid=response.is_valid, 
+                form=response.form
+            )
 
 
 class TweetsListView(ListView):

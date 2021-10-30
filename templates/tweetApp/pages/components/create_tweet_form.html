@@ -1,8 +1,18 @@
 
 <form id="tweet-form" method="POST">
 	{% csrf_token %}
-	{{ tweet_form.as_p }}
-	
+
+	{% for field in tweet_form %}
+	 	<font color="red">
+	 		<small id="tweet-form-error">{{ field.errors }}</small>
+	 	</font>
+	 	<p align="center">{{ field.label_tag }} {{ field }}</p>
+	 	{% if field.help_text %}
+	 		<p class="help">{{ field.help_text|safe }}</p>
+	 	{% endif %}
+	 {% endfor %}
+
+	<br>
 	<button id="sendButton" type="submit" class="btn btn-secondary">Tweet!</button>
 </form>
 

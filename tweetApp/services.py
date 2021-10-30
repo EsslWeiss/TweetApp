@@ -1,3 +1,4 @@
+from collections import namedtuple
 import ipdb
 
 
@@ -40,7 +41,7 @@ class TweetsCollection(TweetCore):
         import random
         tweets = {'data': []}
 
-        for t in reversed(self.tweet_model.objects.all()):
+        for t in self.tweet_model.objects.all():
             file_url = self._get_file_url(t)
             dc = t.date_created.strftime('%H:%M %d.%m.%y')
             tweets['data'].append(
@@ -61,11 +62,24 @@ class TweetCreator(TweetCore):
         super().__init__(model)
 
     def create_tweet(self, post_data, form):
-        tweet_form = form({'text_content': post_data['text_content']})
-        if tweet_form.is_valid():
-            tweet_obj = tweet_form.save(commit=False)
-            tweet_obj.save()
-            return tweet_obj
+        t_create_resp = namedtuple('tweet_create_response', 
+                ['object', 'form', 'is_valid', 'errors']
+            )
+        t_form = form({'text_content': post_data['text_content']})
+        if t_form.is_valid():
+            t_obj = t_form.save(commit=False)
+            t_obj.save()
+            return t_create_resp(
+                    object=t_obj,
+                    form=t_form,
+                    is_valid=True,
+                    errors=None
+                )
         
-        return False
+        return t_create_resp(
+                object=None,
+                form=t_form,
+                is_valid=False, 
+                errors=t_form.errors
+            )
 

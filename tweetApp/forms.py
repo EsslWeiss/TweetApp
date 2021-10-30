@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import Tweet
 
 from django.urls import reverse
@@ -6,31 +7,26 @@ import ipdb
 
 
 class TweetForm(forms.ModelForm):
-    MAX_TWEET_LENGTH = 450
-
-    to_next_page = forms.URLField(required=False, widget=forms.HiddenInput())
+    MAX_TWEET_LENGTH = 599
 
     class Meta:
         model = Tweet
         fields = ('text_content', )
         
     def __init__(self, *args, **kwargs):
-        # kwargs = {'initial': {'to_next_page': 'url_to_next_page'}}
         super().__init__(*args, **kwargs)
         self.fields['text_content'].widget.attrs.update(
                 {
                     'id': 'textContentInput',
-                    'required': 'required'
+                    'required': 'required',
+                    'placeholder': 'add your tweet today!'
                 }
-            )
-        self.fields['to_next_page'].widget.attrs.update(
-                {'id': 'toNextPageInput'}
             )
 
     def clean_text_content(self):
         tweet = self.cleaned_data.get('text_content')
         if len(tweet) > self.MAX_TWEET_LENGTH:
-            raise self.ValidationError('tweet length exceeded')
+            raise ValidationError('tweet length exceeded!')  # set error message to form.errors
 
         return tweet
 

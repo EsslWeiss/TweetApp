@@ -10,19 +10,38 @@ function likeBtn(tweet) {
 	return "<button id='tweet-" + tweet.id + "' class='btn btn-primary' onclick=addLike(" + tweet.id + ")>" + tweet.likes + " like</button>";
 }
 
+function clearErrorContainer() {
+	let errorContainer = document.getElementById('tweet-form-error');
+	errorContainer.innerHTML = "";
+	return;
+}
+
+function validationForm() {
+	let textContent = document.getElementById('textContentInput').value;
+	let errorContainer = document.getElementById('tweet-form-error');
+	
+	if(textContent.length === 0) {
+		errorContainer.innerHTML = 'you forgot to tweet';
+		return false;
+	} else {
+		return true;
+	}
+}
+
 function sendTweetForm(e) {
-	e.preventDefault();
+	e.preventDefault(); 
+	let xhr = new XMLHttpRequest();
+	isValid = validationForm();
+	if (isValid === false) {
+		xhr.abort();
+		return;
+	}
 
 	let textContent = document.getElementById('textContentInput').value;
-	let toNextPage = document.getElementById('toNextPageInput').value;
 	let csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-
 	csrfToken = 'csrfmiddlewaretoken=' + encodeURIComponent(csrfToken);
-	toNextPage = 'to_next_page=' + encodeURIComponent(toNextPage);
 	textContent = 'text_content=' + encodeURIComponent(textContent);
-	const postData = csrfToken + '&' + toNextPage + '&' + textContent
-	
-	let xhr = new XMLHttpRequest();
+	const postData = csrfToken + '&' + textContent
 	xhr.responseType = 'json';
 	xhr.open('POST', '/', true);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
@@ -30,9 +49,12 @@ function sendTweetForm(e) {
 	xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
 	
 	xhr.addEventListener("readystatechange", () => {
-		if(xhr.readyState === 4 && xhr.status === 200) {       
+		if(xhr.readyState === 4 && xhr.status === 201) {
+			clearErrorContainer();
+
  			document.getElementById('textContentInput').value = "";
 			let tweetsBar = document.getElementById('tweets-list');
+			let errorsContainer
 			const newTweet = xhr.response;
 			if (tweetsBar.innerHTML.trim().length > 0) {
 				let tweetDate = '<p align="center"><small>' + newTweet.date_created  + '</small></p>';
@@ -42,7 +64,14 @@ function sendTweetForm(e) {
 				return;
 			}
 		}
+		if(xhr.status === 400) {
+			let errorContainer = document.getElementById('tweet-form-error');
+			let errors = xhr.response;
+			errorContainer.innerHTML = errors.text_content[0]
+			return;
+		}
 	});
+	
 	xhr.send(postData);
 }
 

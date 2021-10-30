@@ -35,4 +35,3 @@ function loadTweetsToHTML() {
 
 document.getElementById('load-tweets').addEventListener('click', loadTweetsToHTML);
 
-

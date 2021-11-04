@@ -1,0 +1,2 @@
+MAX_TWEET_LENGTH = 450
+

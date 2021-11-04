@@ -3,9 +3,7 @@
 	{% csrf_token %}
 
 	{% for field in tweet_form %}
-	 	<font color="red">
-	 		<small id="tweet-form-error">{{ field.errors }}</small>
-	 	</font>
+	 	<small class="d-none alert alert-danger" id="tweet-form-error">{{ field.errors }}</small>
 	 	<p align="center">{{ field.label_tag }} {{ field }}</p>
 	 	{% if field.help_text %}
 	 		<p class="help">{{ field.help_text|safe }}</p>

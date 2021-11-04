@@ -61,23 +61,24 @@ class TweetCreator(TweetCore):
     def __init__(self, model):
         super().__init__(model)
 
-    def create_tweet(self, post_data, form):
+    def create_tweet(self, user, data, form):
         t_create_resp = namedtuple('tweet_create_response', 
-                ['object', 'form', 'is_valid', 'errors']
+                ['tweet_obj', 'form', 'is_valid', 'errors']
             )
-        t_form = form({'text_content': post_data['text_content']})
+        t_form = form({'text_content': data['text_content']})
         if t_form.is_valid():
             t_obj = t_form.save(commit=False)
+            t_obj.user = user
             t_obj.save()
             return t_create_resp(
-                    object=t_obj,
+                    tweet_obj=t_obj,
                     form=t_form,
                     is_valid=True,
                     errors=None
                 )
         
         return t_create_resp(
-                object=None,
+                tweet_obj=None,
                 form=t_form,
                 is_valid=False, 
                 errors=t_form.errors

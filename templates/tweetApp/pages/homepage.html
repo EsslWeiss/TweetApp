@@ -20,7 +20,11 @@
 
 {% block load_scripts %}
 	
-	<script src="{% static 'js/tweets_list_porcessing.js' %}"></script>
-	<script src="{% static 'js/ajax_tweetform_processing.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/tweets_list_porcessing.js' %}">
+	</script>
+
+	<script type="text/javascript" src="{% static 'js/ajax_tweetform_processing.js' %}">
+	</script>
 
 {% endblock load_scripts %}
+

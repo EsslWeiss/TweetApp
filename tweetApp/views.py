@@ -35,6 +35,7 @@ def tweets_list_view(request, *args, **kwargs):
     # qs = Tweet.objects.all()
     # serial = TweetSerializer(qs, many=True)
     # return Response(serial.data, status=200)
+    ipdb.set_trace()
     t_coll = TweetsCollection(model=Tweet)
     tweets = t_coll.get_tweets_list()
     return Response(tweets)

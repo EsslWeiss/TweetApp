@@ -46,7 +46,7 @@ function sendTweetForm(e) {
 	textContent = 'text_content=' + encodeURIComponent(textContent);
 	const postData = csrfToken + '&' + textContent
 	xhr.responseType = 'json';
-	xhr.open('POST', '/tweet-create/', true);
+	xhr.open('POST', '/api/tweet-create/', true);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
 	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 	xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');

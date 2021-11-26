@@ -33,6 +33,28 @@ class Tweet(models.Model):
     class Meta: 
         ordering = ['-date_created']
 
+    @property
+    def date_by_format(self):
+        return self.date_created.strftime('%H:%M %d.%m.%y')
+
+    @property
+    def is_retweet(self):
+        '''
+            Проверяем является ли текущий твит ретвитом
+        '''
+        return self.parent != None
+
+    @property
+    def retweet_with_comment(self):
+        '''
+            Если твит является ретвитом и у него есть текстовый контент, то это ретвит с комментарием
+        '''
+        return True if self.is_retweet and self.text_content else False
+
+    @property
+    def retweet_info(self):
+        ...
+
     def __str__(self):
         return "<id: %s; date: %s>" % (self.id, self.date_created.strftime('%Y-%m-%d'))
 

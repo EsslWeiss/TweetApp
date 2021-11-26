@@ -15,100 +15,247 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function tweetLikeAction(tweet_id) {
+
+function retweetButton(tweet) {
+    return "<button class='btn btn-outline-success btn-sm' onclick=actionTweetButton(" + 
+    	tweet.id + ",'retweet')>retweet</button>"
+}
+
+function unlikeButton(tweet) {
+    return "<button id='unlike-counter' class='btn btn-outline-primary btn-sm tweet-unlike' onclick=actionTweetButton(" + 
+    	tweet.id + ",'unlike')>unlike</button>"
+}
+
+function likeButton(tweet) {
+    return "<button id='like-counter' class='btn btn-primary btn-sm tweet-like' onclick=actionTweetButton(" + 
+    	tweet.id + ",'like')>" + tweet.likes + " likes</button>"
+}
+
+
+
+/* ------------------ Паттерн фабричный метод ------------------------------- */
+
+class TweetHTMLComponentsFactory {
+
+	createTweetHTMLComponent(tweet) {
+		return new TweetHTMLComponent(tweet);
+	}
+
+	createRetweetHTMLComponent(tweet) {
+		return new RetweetHTMLComponent(tweet);
+	}
+	
+	createRetweetWithCommentHTMLComponent(tweet) {
+		return new RetweetWithCommentHTMLComponent(tweet);
+	}
+}
+
+class TweetHTMLComponent {
+
+	constructor(tweet) {
+		this.tweet = tweet;
+	}
+
+	getComponent() {
+		let t = this.tweet;
+		return '<div class="tweet-' + t.id + ' card text-white bg-dark mb-3" style="margin-left: 255px;' +  
+					'margin-right: 255px; margin-bottom: 25px;  margin-top: 25px">' +
+ 		       		'<div class="card-header">' + 
+		       			'<a style="color: yellow;">@' + t.user + '</a>' + 
+		       			'<em style="color: yellow; margin-left: 550px;">#origin tweet</em>' + 
+ 		       		'</div>' + 
+				'<div class="card-body">' + 
+    		       			'<p class="card-text">' + t.text_content + '</p>' + 
+				'</div>' + 
+
+				'<div class="btn-group d-flex" style="width: 30%; margin-left: 30px; margin-bottom: 10px;">' +
+		    			likeButton(t) +
+		    			unlikeButton(t) + 
+					retweetButton(t) +
+				'</div>' + 
+
+		       		'<div><em style="color: yellow; margin-left: 630px;">' + t.date_created + '</em></div>' +
+  			'</div>'
+	}
+}
+
+class RetweetHTMLComponent {
+
+	constructor(tweet) {
+		this.tweet = tweet;
+	}
+
+	getComponent() {
+		let t = this.tweet;
+		return '<div class="tweet-' + t.parent.id + ' card text-white bg-dark mb-3" style="margin-left: 255px;' +  
+					'margin-right: 255px; margin-bottom: 25px;  margin-top: 25px">' +
+ 		       		'<div class="card-header">' + 
+		       			'<a style="color: yellow;">@' + t.user + '</a>' + 
+		       			'<em style="color: yellow; margin-left: 450px;">#no comment retweet from @' + 
+						t.parent.user + '</em>' + 
+ 		       		'</div>' + 
+				'<div class="card-body">' + 
+    		       			'<p class="card-text">' + t.parent.text_content + '</p>' + 
+				'</div>' + 
+	
+				'<div class="btn-group d-flex" style="width: 30%; margin-left: 30px; margin-bottom: 10px;">' +
+		    			likeButton(t.parent) +
+		    			unlikeButton(t.parent) + 
+				'</div>' + 
+
+		       		'<div><em style="color: yellow; margin-left: 630px;">' + t.parent.date_created + '</em></div>' +
+  			'</div>'
+	}
+}
+
+class RetweetWithCommentHTMLComponent {
+
+	constructor(tweet) {
+		this.tweet = tweet;
+	}
+
+	getComponent() {
+		let t = this.tweet;
+		return '<div class="tweet-' + t.id + ' card text-white bg-dark mb-3" style="margin-left: 255px;' +  
+					'margin-right: 255px; margin-bottom: 25px;  margin-top: 25px">' +
+ 		       		
+				'<div class="card-header">' + 
+		       			'<a style="color: yellow;">@' + t.user + '</a>' + 
+		       			'<em style="color: yellow; margin-left: 450px;">#retweet with comment from @' + 
+						t.parent.user + '</em>' + 
+ 		       		'</div>' + 
+
+				'<div class="card-body">' + 
+    		       			'<p class="card-text">' + t.text_content + '</p>' + 
+				'</div>' + 
+
+					'<div class="card border-warning mb-3" style="margin-left: 170px;' +  
+							'margin-right: 170px; margin-bottom: 25px;  margin-top: 25px">' + 
+  						
+						'<div class="card-body text-dark">' + 
+    							'<p class="card-text">' + t.parent.text_content + '</p>' +
+  						'</div>' +
+					'</div>' + 
+
+				'<div class="btn-group d-flex" style="width: 30%; margin-left: 30px; margin-bottom: 10px;">' +
+		    			likeButton(t) +
+		    			unlikeButton(t) + 
+				'</div>' + 
+
+		       		'<div><em style="color: yellow; margin-left: 630px;">' + t.date_created + '</em></div>' +
+  			'</div>'
+	}
+}
+
+/* -------------------------------------------------------------------- */
+
+
+function formatRetweetElement(tweet) {
+	let factory = new TweetHTMLComponentsFactory();
+	let component = null;
+	if (tweet.retweet_with_comment === true) {
+		let resp = factory.createRetweetWithCommentHTMLComponent(tweet);
+		component = resp.getComponent();
+	} else {
+		let resp = factory.createRetweetHTMLComponent(tweet);
+		component = resp.getComponent();
+	}
+	return component
+}
+
+function formatTweetElement(tweet) {
+	let factory = new TweetHTMLComponentsFactory();
+	let resp = factory.createTweetHTMLComponent(tweet);
+	return resp.getComponent();
+}
+
+
+function socialScoreHandler(tweet_id, xhr) {
+	let tweet = JSON.parse(xhr.response);
+	let tweets = document.getElementsByClassName('tweet-' + tweet_id);
+	for (i=0; i<tweets.length; i++){
+		let likeBtn = tweets[i].getElementsByClassName('tweet-like')[0];
+		console.log(likeBtn);
+		likeBtn.innerText = tweet.likes + ' likes'; 
+	}
+	return;
+}
+
+function retweetHandler(xhr) {
+	let tweet = JSON.parse(xhr.response);
+	let factory = new TweetHTMLComponentsFactory();
+	let tweetsBar = document.getElementById('tweets-list');
+	let resp = null;
+
+	if (tweet.retweet_with_comment) {
+		resp = factory.createRetweetWithCommentHTMLComponent(tweet);
+	} else {
+		resp = factory.createRetweetHTMLComponent(tweet);
+	}
+	
+	console.log(tweet);
+	console.log(resp.getComponent());
+	tweetsBar.innerHTML = resp.getComponent() + tweetsBar.innerHTML;
+	return;
+}
+
+function actionTweetButton(tweet_id, action) {
 	const url = '/api/tweet/action';
 	const method = 'POST';
 	const data = JSON.stringify({
 		id: tweet_id,
-		action: 'like'
+		action: action
 	});
-	console.log(data);
 	const csrftoken = getCookie('csrftoken');
-
 	let xhr = new XMLHttpRequest();
 	xhr.open(method, url);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
 	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 	xhr.setRequestHeader('Content-Type', 'application/json');
 	xhr.setRequestHeader('X-CSRFToken', csrftoken);
-	xhr.onload = () => {
-		console.log(xhr.status, xhr.response);
-	}
-	xhr.send(data);
-}
 
-
-function tweetUnlikeAction(tweet_id) {
-	const url = '/api/tweet/action';
-	const method = 'POST';
-	const data = JSON.stringify({
-		id: tweet_id,
-		action: 'unlike'
+	xhr.addEventListener("readystatechange", () => {
+		if(xhr.readyState === 4 && xhr.status === 200) {
+			if(action === 'like') {
+				socialScoreHandler(tweet_id, xhr);  // Обработка <лайка\дизлайка>
+			} else if(action === 'unlike') {
+				socialScoreHandler(tweet_id, xhr);
+			} else if(action === 'retweet') {
+				retweetHandler(xhr);  // Обработка ретвита
+			}
+		}
 	});
-	console.log(data);
-	const csrftoken = getCookie('csrftoken');
-
-	let xhr = new XMLHttpRequest();
-	xhr.open(method, url);
-	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
-	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.setRequestHeader('X-CSRFToken', csrftoken);
-	xhr.onload = () => {
-		console.log(xhr.status, xhr.response);
-	}
 	xhr.send(data);
-}
+}	
 
-
-function tweetRetweetAction(tweet_id) {
-	const url = '/api/tweet/action';
-	const method = 'POST';
-	const data = JSON.stringify({
-		id: tweet_id,
-		action: 'retweet'
-	});
-	console.log(data);
-	const csrftoken = getCookie('csrftoken');
-
-	let xhr = new XMLHttpRequest();
-	xhr.open(method, url);
-	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
-	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.setRequestHeader('X-CSRFToken', csrftoken);
-	xhr.onload = () => {
-		console.log(xhr.status, xhr.response);
-	}
-	xhr.send(data);
-}
 
 
 function loadTweetsToHTML() {
 	let tweetsBar = document.getElementById('tweets-list');
-	let tweetFormContainer = document.getElementById('tweet-form-container');
-	let tweetForm = document.getElementById('tweet-form');
 
-	let xhr = new XMLHttpRequest();
+	const xhr = new XMLHttpRequest();
 	xhr.responseType = 'json';
-	let url = 'api/tweets/';
-	xhr.open('GET', url);
+	const url = 'api/tweets/';
+	const method = 'GET';
+	xhr.open(method, url);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
 	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-	
-	xhr.onload = () => {
-		let tweets = xhr.response;
-		let tweetsList = '';
-		for(let t in tweets) {
-			console.log('in tweets cycle.');
-			tweetsList += '<p><small>' + tweets[t].date_created + '</small></p>';
-		
-			tweetsList += '<b>' + tweets[t].text_content + '</b> ' + "<br><div align='center' class='btn-group'><button id='tweet-" + tweets[t].id + "' class='btn btn-primary btn-sm' onclick='tweetLikeAction(" + tweets[t].id + ")'>" + tweets[t].likes + " like</button> <button id='tweet-" + tweets[t].id + "' class='btn btn-primary btn-sm' onclick='tweetUnlikeAction(" + tweets[t].id + ")'> unlike</button> <button id='tweet-" + tweets[t].id + "' class='btn btn-primary btn-sm' onclick='tweetRetweetAction(" + tweets[t].id + ")'> retweet</button></div>" + '<br><br>';
+	xhr.onload  = () => {
+		let tweets = xhr.response;  // Возвращает массив объектов
+		let tweetsListString = '';  // Строка, содержащая HTML-элементы твита
+		for (i=0; i<tweets.length; i++){
+			var tweetObj = tweets[i];
+			if (tweetObj.is_retweet === true) {
+				var currentItem = formatRetweetElement(tweetObj);
+			} else {
+				var currentItem = formatTweetElement(tweetObj);  // Получаем HTML формат твита
+			}
+			tweetsListString += currentItem;  // Добавляем HTML твита в общую строку
 		}
-		tweetsBar.innerHTML = tweetsList;
+		tweetsBar.innerHTML = tweetsListString;  // Помещаем HTML-элементы твита в контейнер
 	}
 	xhr.send();
 }
 
-document.getElementById('load-tweets').addEventListener('click', loadTweetsToHTML);
+loadTweetsToHTML();
 

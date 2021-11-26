@@ -15,7 +15,7 @@ from rest_framework.decorators import (api_view,
         authentication_classes) 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .api.serializers import TweetSerializer
+# from .api.serializers import TweetSerializer
 
 import ipdb
 
@@ -48,14 +48,14 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
         return Response({'message': 'tweet not found'}, status=404)
 
     tweet_obj = qs.first()
-    serial = TweetSerializer(tweet_obj)
+    # serial = TweetSerializer(tweet_obj)
     return Response(serial.data, status=200)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) 
 def tweet_create_view(request, *args, **kwargs):
-    serial = TweetSerializer(data=request.POST or None)
+    # serial = TweetSerializer(data=request.POST or None)
     if serial.is_valid():
         serial.save(user=request.user)
         if request.is_ajax():
@@ -101,7 +101,7 @@ class TweetsHomePage(APIView):
                 return Response({}, status=401)
             return redirect(settings.LOGIN_URL)
 
-        serial = TweetSerializer(data=request.POST or None)
+        # serial = TweetSerializer(data=request.POST or None)
         if serial.is_valid():
             serial.save(user=request.user)
             if request.is_ajax():
@@ -124,7 +124,7 @@ class TweetsListView(ListView):
 
 class TweetDetailView(APIView):
     model = Tweet
-    serializer = TweetSerializer
+    # serializer = TweetSerializer
 
     def get(self, request, tweet_id, *args, **kwargs):
         qs = self.model.objects.filter(id=tweet_id)

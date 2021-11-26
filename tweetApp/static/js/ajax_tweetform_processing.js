@@ -59,8 +59,6 @@ function sendTweetForm(e) {
  			document.getElementById('textContentInput').value = "";
 			let tweetsBar = document.getElementById('tweets-list');
 			const newTweet = xhr.response;
-			console.log(111);
-			console.log(newTweet);
 			if (tweetsBar.innerHTML.trim().length > 0) {
 				let tweetDate = '<p align="center"><small>' + newTweet.date_created  + '</small></p>';
 				let tweetElem = '<p align="center"><b>' + newTweet.text_content + '</b> ' + likeBtn(newTweet) + '</p><br><br>';

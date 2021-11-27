@@ -35,20 +35,36 @@ function likeButton(tweet) {
 
 /* ------------------ Паттерн фабричный метод ------------------------------- */
 
-class TweetHTMLComponentsFactory {
 
-	createTweetHTMLComponent(tweet) {
+class AbstractTweetFactory {
+
+	createComponent(tweet) { }
+
+}
+
+class BaseTweetFactory extends AbstractTweetFactory {
+	
+	createComponent(tweet) {
 		return new TweetHTMLComponent(tweet);
 	}
+}
 
-	createRetweetHTMLComponent(tweet) {
+class BaseRetweetFactory extends AbstractTweetFactory {
+
+	createComponent(tweet) {
 		return new RetweetHTMLComponent(tweet);
 	}
-	
-	createRetweetWithCommentHTMLComponent(tweet) {
+
+}
+
+class RetweetWithCommentFactory extends AbstractTweetFactory {
+
+	createComponent(tweet) {
 		return new RetweetWithCommentHTMLComponent(tweet);
 	}
+
 }
+
 
 class TweetHTMLComponent {
 
@@ -151,22 +167,25 @@ class RetweetWithCommentHTMLComponent {
 
 
 function formatRetweetElement(tweet) {
-	let factory = new TweetHTMLComponentsFactory();
 	let component = null;
+
 	if (tweet.retweet_with_comment === true) {
-		let resp = factory.createRetweetWithCommentHTMLComponent(tweet);
-		component = resp.getComponent();
+		let factory = new RetweetWithCommentFactory();
+		let response = factory.createComponent(tweet);
+		component = response.getComponent();
 	} else {
-		let resp = factory.createRetweetHTMLComponent(tweet);
-		component = resp.getComponent();
+		let factory = new BaseRetweetFactory();
+		let response = factory.createComponent(tweet);
+		component = response.getComponent();
 	}
-	return component
+	return component;
 }
 
 function formatTweetElement(tweet) {
-	let factory = new TweetHTMLComponentsFactory();
-	let resp = factory.createTweetHTMLComponent(tweet);
-	return resp.getComponent();
+	let factory = new BaseTweetFactory();
+	let response = factory.createComponent(tweet);
+	let component = response.getComponent();
+	return component;
 }
 
 
@@ -175,7 +194,6 @@ function socialScoreHandler(tweet_id, xhr) {
 	let tweets = document.getElementsByClassName('tweet-' + tweet_id);
 	for (i=0; i<tweets.length; i++){
 		let likeBtn = tweets[i].getElementsByClassName('tweet-like')[0];
-		console.log(likeBtn);
 		likeBtn.innerText = tweet.likes + ' likes'; 
 	}
 	return;
@@ -183,19 +201,18 @@ function socialScoreHandler(tweet_id, xhr) {
 
 function retweetHandler(xhr) {
 	let tweet = JSON.parse(xhr.response);
-	let factory = new TweetHTMLComponentsFactory();
 	let tweetsBar = document.getElementById('tweets-list');
-	let resp = null;
+	let component = null;
 
 	if (tweet.retweet_with_comment) {
-		resp = factory.createRetweetWithCommentHTMLComponent(tweet);
+		let factory = new RetweetWithCommentFactory();
+		component = factory.createComponent(tweet).getComponent();
 	} else {
-		resp = factory.createRetweetHTMLComponent(tweet);
+		let factory = new BaseRetweetFactory();
+		component = factory.createComponent(tweet).getComponent();
 	}
 	
-	console.log(tweet);
-	console.log(resp.getComponent());
-	tweetsBar.innerHTML = resp.getComponent() + tweetsBar.innerHTML;
+	tweetsBar.innerHTML = component + tweetsBar.innerHTML;
 	return;
 }
 

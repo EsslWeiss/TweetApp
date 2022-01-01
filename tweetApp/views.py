@@ -55,7 +55,8 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) 
 def tweet_create_view(request, *args, **kwargs):
-    # serial = TweetSerializer(data=request.POST or None)
+    ipdb.set_trace()
+    serial = TweetSerializer(data=request.POST or None)
     if serial.is_valid():
         serial.save(user=request.user)
         if request.is_ajax():

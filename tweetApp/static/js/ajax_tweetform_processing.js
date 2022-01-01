@@ -1,14 +1,57 @@
+/* ------------------ Паттерн фабричный метод ------------------------------- */
 
-function addLike(tweet_id) {
-	tweetBtn = document.getElementById('tweet-' + tweet_id);
-	let currLike = parseInt(tweetBtn.innerHTML.match(/\d+/), 10);
-	tweetBtn.innerHTML = (currLike += 1) + ' like';
+
+function formatRetweetElement(tweet) {
+	let component = null;
+
+	if (tweet.retweet_with_comment === true) {
+		let factory = new RetweetWithCommentFactory();
+		let response = factory.createComponent(tweet);
+		component = response.getComponent();
+	} else {
+		let factory = new BaseRetweetFactory();
+		let response = factory.createComponent(tweet);
+		component = response.getComponent();
+	}
+	return component;
+}
+
+function formatTweetElement(tweet) {
+	let factory = new BaseTweetFactory();
+	let response = factory.createComponent(tweet);
+	return response.getComponent();
+}
+
+function socialScoreHandler(tweet_id, xhr) {
+	let tweet = JSON.parse(xhr.response);
+	let tweets = document.getElementsByClassName('tweet-' + tweet_id);
+	for (i=0; i<tweets.length; i++){
+		let likeBtn = tweets[i].getElementsByClassName('tweet-like')[0];
+		likeBtn.innerText = tweet.likes + ' likes'; 
+	}
 	return;
 }
 
-function likeBtn(tweet) {
-	return "<button id='tweet-" + tweet.id + "' class='btn btn-primary' onclick=addLike(" + tweet.id + ")>" + tweet.likes + " like</button>";
+
+function retweetHandler(xhr) {
+	let tweet = JSON.parse(xhr.response);
+	let tweetsBar = document.getElementById('tweets-list');
+	let component = null;
+
+	if (tweet.retweet_with_comment) {
+		let factory = new RetweetWithCommentFactory();
+		component = factory.createComponent(tweet).getComponent();
+	} else {
+		let factory = new BaseRetweetFactory();
+		component = factory.createComponent(tweet).getComponent();
+	}
+	
+	tweetsBar.innerHTML = component + tweetsBar.innerHTML;
+	return;
 }
+
+/* -------------------------------------------------------------------- */
+
 
 function clearErrorContainer() {
 	let errorContainer = document.getElementById('tweet-form-error');
@@ -38,7 +81,6 @@ function sendTweetForm(e) {
 		xhr.abort();
 		return;
 	}
-	console.log('start js');
 
 	let textContent = document.getElementById('textContentInput').value;
 	let csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
@@ -46,29 +88,28 @@ function sendTweetForm(e) {
 	textContent = 'text_content=' + encodeURIComponent(textContent);
 	const postData = csrfToken + '&' + textContent
 	xhr.responseType = 'json';
-	xhr.open('POST', '/api/tweet-create/', true);
+	xhr.open('POST', '/api/tweet/create/', true);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
 	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 	xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
 	
 	xhr.addEventListener("readystatechange", () => {
-		console.log('send form');
 		if(xhr.readyState === 4 && xhr.status === 201) {
 			clearErrorContainer();
+ 			document.getElementById('textContentInput').value = '';
 
- 			document.getElementById('textContentInput').value = "";
 			let tweetsBar = document.getElementById('tweets-list');
+			let t = null;
 			const newTweet = xhr.response;
-			if (tweetsBar.innerHTML.trim().length > 0) {
-				let tweetDate = '<p align="center"><small>' + newTweet.date_created  + '</small></p>';
-				let tweetElem = '<p align="center"><b>' + newTweet.text_content + '</b> ' + likeBtn(newTweet) + '</p><br><br>';
-				tweetsBar.innerHTML = tweetDate + tweetElem + tweetsBar.innerHTML;
-			} else { 
-				return;
+			if (newTweet.is_retweet === true) {
+				t = formatRetweetElement(newTweet);
+			} else {
+				t = formatTweetElement(newTweet);  // Получаем HTML формат твита
 			}
+			tweetsBar.innerHTML = t + tweetsBar.innerHTML;
+			return;
 		}
 		if(xhr.status === 400) {
-			console.log('status code 400!');
 			let errorContainer = document.getElementById('tweet-form-error');
 			let errors = xhr.response;
 			if(errors) {
@@ -93,7 +134,5 @@ function sendTweetForm(e) {
 	xhr.send(postData);
 }
 
-document.getElementById('sendButton').addEventListener(
-	'click', sendTweetForm
-);
+document.getElementById('sendButton').addEventListener('click', sendTweetForm);
 

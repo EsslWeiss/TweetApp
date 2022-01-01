@@ -47,12 +47,10 @@ def tweet_create_view(request, *args, **kwargs):
     serial = TweetCreateSerializer(data=request.POST or None) # Заполняем сериализатор данными, которые пришли в HTTP body
     if serial.is_valid(): # Проверка данных полей сериализатора на валидность
         tweet_obj = serial.save(user=request.user) # Создаём новый объект твита, указываем отправившего твит пользователя.
-        if request.is_ajax():
-            serial = TweetSerializer(tweet_obj)
-            return Response(serial.data, status=201) # Возвращает JSON с данными и статусом 201 - успешно создан новый объект
+        serial = TweetSerializer(tweet_obj)
+        return Response(serial.data, status=201) # Возвращает JSON с данными и статусом 201 - успешно создан новый объект
     if serial.errors: # Данные полей сериализатора не вылидны. Проверяем наличие ошибок
-        if request.is_ajax():
-            return Response({'error_messages': serial.errors}, status=400) # Возвращаем информацию об ошибе.
+        return Response({'error_messages': serial.errors}, status=400) # Возвращаем информацию об ошибе.
 
     return Response({}, status=404) # Поведение не обработано...
 
@@ -65,7 +63,6 @@ def tweet_delete_view(request, *args, **kwargs):
             - Контроллер получает HTTP body 'id=xxx'
             - id - обязательный параметр
     '''
-    ipdb.set_trace()
     tweet_id = request.POST.get('id')
     qs = Tweet.objects.filter(Q(id=int(tweet_id)) & Q(user=request.user))
     if not qs.exists():
@@ -85,7 +82,6 @@ def tweet_action_view(request, *args, **kwargs):
             - id - обязательный параметр
             - Действия над твитом: like, unlike, retweet
     '''
-    ipdb.set_trace()
     action_serial = TweetActionSerializer(data=request.data) # Заполняем сериализатор данными, которые пришли в HTTP body
     if action_serial.is_valid(): # Проверка данных полей сериализатора на валидность
         data = action_serial.validated_data # Получаем проверенные данные 

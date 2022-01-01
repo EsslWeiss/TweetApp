@@ -188,7 +188,6 @@ function formatTweetElement(tweet) {
 	return component;
 }
 
-
 function socialScoreHandler(tweet_id, xhr) {
 	let tweet = JSON.parse(xhr.response);
 	let tweets = document.getElementsByClassName('tweet-' + tweet_id);
@@ -244,7 +243,6 @@ function actionTweetButton(tweet_id, action) {
 	});
 	xhr.send(data);
 }	
-
 
 
 function loadTweetsToHTML() {

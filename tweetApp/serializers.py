@@ -3,7 +3,7 @@ import ipdb
 from rest_framework import serializers
 from django.conf import settings
 
-from ..models import Tweet
+from .models import Tweet
 from .bad_request_messages import (
         LONG_TWEET_MESSAGE, 
         WRONG_ACTION_FORMAT_MESSAGE, 

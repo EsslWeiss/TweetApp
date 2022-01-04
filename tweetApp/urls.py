@@ -1,27 +1,32 @@
 from django.urls import path, include
 from .views import (
-        tweets_homepage, tweets_list_view, 
-        tweet_detail_view, tweet_create_view, 
+        tweets_homepage, # используем базовые HTML-шаблоны Django
+        # Используем DRF 
+        tweets_list_view, 
+        tweet_detail_view, 
+        tweet_create_view, 
+        tweet_action_view,
         tweet_delete_view
     )
-from .api import views as api_views 
 
+TWEET_LIST_NAME = 'tweets-list'
+TWEET_DETAIL_NAME = 'tweet-detail'
+TWEET_CREATE_NAME = 'tweet-create'
+TWEET_DELETE_NAME = 'tweet-delete'
+TWEET_ACTION_NAME = 'tweet-action'
 
+# Контроллеры, в которых используется DRF
 api_urlpatterns = [
-    path('tweets/', api_views.tweets_list_view, name='tweets-list'),
-    path('tweet/<int:tweet_id>/detail', api_views.tweet_detail_view, name='tweet-detail'),
-    path('tweet/create/', api_views.tweet_create_view, name='tweet-create'),
-    path('tweet/delete/', api_views.tweet_delete_view, name='tweet-delete'),
-    path('tweet/action', api_views.tweet_action_view, name='tweet-action')
+    path('tweets/', tweets_list_view, name=TWEET_LIST_NAME),
+    path('tweet/<int:tweet_id>/detail', tweet_detail_view, name=TWEET_DETAIL_NAME),
+    path('tweet/create/', tweet_create_view, name=TWEET_CREATE_NAME),
+    path('tweet/delete/', tweet_delete_view, name=TWEET_DELETE_NAME),
+    path('tweet/action/', tweet_action_view, name=TWEET_ACTION_NAME)
 ]
 
 app_name = 'tweetApp'
 urlpatterns = [
     path('', tweets_homepage, name='tweets-homepage'),
-    path('tweet/<int:tweet_id>/detail', tweet_detail_view, name='tweet-detail'),
-    path('tweet-create/', tweet_create_view, name='tweet-create'),
-    # path('tweet/<int:tweet_id>/delete', tweet_delete_view, name='tweet-delete'),
-
     path('api/', include(api_urlpatterns))
 ]
 

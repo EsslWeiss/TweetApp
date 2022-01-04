@@ -250,7 +250,7 @@ function loadTweetsToHTML() {
 
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = 'json';
-	const url = 'api/tweets/';
+	const url = '/api/tweets/';
 	const method = 'GET';
 	xhr.open(method, url);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');

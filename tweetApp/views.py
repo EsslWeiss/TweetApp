@@ -7,7 +7,8 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (api_view, 
+from rest_framework.decorators import (
+        api_view, 
         permission_classes, 
         authentication_classes) 
 from rest_framework.permissions import IsAuthenticated
@@ -111,15 +112,15 @@ def tweet_action_view(request, *args, **kwargs):
             # Твит не найден! возвращаем информацию об ошибке со статусом 404 - ресурс не найден.
             return Response({'message': 'Sorry, tweet not found!'}, status=404)
         tweet = qs.first()
-        if tweet_action == 'like':
-            tweet.likes.add(request.user) # К твиту добавляем лайк от отправившего запрос пользователя
-            tweet_serial = TweetSerializer(tweet) # Сериализуем объект твита в примитивный тип Python
-        
-        elif tweet_action == 'unlike':
-            tweet.likes.remove(request.user) # Убираем лайк пользователя
-            tweet_serial = TweetSerializer(tweet) # Сериализуем объект твита в примитивный тип Python
-
-        elif tweet_action == 'retweet':
+        if tweet_action.lower() == 'socialscore':
+            ipdb.set_trace()
+            user = request.user
+            if tweet.likes.contains(user):
+                tweet.likes.remove(user)
+            else:
+                tweet.likes.add(user) 
+            tweet_serial = TweetSerializer(tweet)  # Сериализуем объект твита в примитивный тип Python
+        elif tweet_action.lower() == 'retweet':
             parent_tweet = tweet
             new_tweet = Tweet.objects.create(
                     text_content=tweet_content,

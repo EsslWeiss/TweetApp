@@ -24,7 +24,7 @@ class Tweet(models.Model):
             related_name='likes',
             related_query_name='likes_query',
             through=TweetLike)
-    parent = models.ForeignKey('self', null=True, on_delete=models.SET_NULL) # Retweet field
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL) # Retweet field
     text_content = models.TextField(blank=True, null=True)
     file_content = models.FileField(upload_to='files/', blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)

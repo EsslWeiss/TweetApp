@@ -11,7 +11,7 @@ SECRET_KEY = 'django-insecure-1$355$-r!vgtey#(g0j8c6eqo+h4d*ht=p5l_5pu6$sy7ztc=h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.mydomain.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', ]
 
 LOGIN_URL = '/login-page'
 
@@ -23,8 +23,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # third-party libs
     'rest_framework',
+    'corsheaders',
+    
     # custom libs
     'tweetApp'
 ]
@@ -32,6 +35,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # CORS middleware
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -98,9 +105,18 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# CORS SETTINGS
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://192.168.0.103:3000'
+]
+
+CORS_URLS_REGEX = r'^/api/.*$'
 
 
 # REST FRAMEWORK SETTINGS

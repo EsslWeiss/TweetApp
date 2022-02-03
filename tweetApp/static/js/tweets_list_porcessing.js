@@ -23,12 +23,12 @@ function retweetButton(tweet) {
 
 function unlikeButton(tweet) {
     return "<button id='unlike-counter' class='btn btn-outline-primary btn-sm tweet-unlike' onclick=actionTweetButton(" + 
-    	tweet.id + ",'unlike')>unlike</button>"
+    	tweet.id + ",'socialscore')>unlike</button>"
 }
 
 function likeButton(tweet) {
     return "<button id='like-counter' class='btn btn-primary btn-sm tweet-like' onclick=actionTweetButton(" + 
-    	tweet.id + ",'like')>" + tweet.likes + " likes</button>"
+    	tweet.id + ",'socialscore')>" + tweet.likes + " likes</button>"
 }
 
 
@@ -188,8 +188,8 @@ function formatTweetElement(tweet) {
 	return component;
 }
 
-function socialScoreHandler(tweet_id, xhr) {
-	let tweet = JSON.parse(xhr.response);
+function socialScoreHandler(tweet_id, response) {
+	let tweet = JSON.parse(response);
 	let tweets = document.getElementsByClassName('tweet-' + tweet_id);
 	for (i=0; i<tweets.length; i++){
 		let likeBtn = tweets[i].getElementsByClassName('tweet-like')[0];
@@ -198,8 +198,8 @@ function socialScoreHandler(tweet_id, xhr) {
 	return;
 }
 
-function retweetHandler(xhr) {
-	let tweet = JSON.parse(xhr.response);
+function retweetHandler(response) {
+	let tweet = JSON.parse(response);
 	let tweetsBar = document.getElementById('tweets-list');
 	let component = null;
 
@@ -216,29 +216,28 @@ function retweetHandler(xhr) {
 }
 
 function actionTweetButton(tweet_id, action) {
-	const url = '/api/tweet/action';
-	const method = 'POST';
+	console.log(tweet_id);
+	console.log(action);
 	const data = JSON.stringify({
 		id: tweet_id,
 		action: action
 	});
-	const csrftoken = getCookie('csrftoken');
 	let xhr = new XMLHttpRequest();
-	xhr.open(method, url);
+	xhr.open('POST', 'api/tweet/action/');
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
 	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.setRequestHeader('X-CSRFToken', csrftoken);
+	xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
 
 	xhr.addEventListener("readystatechange", () => {
 		if(xhr.readyState === 4 && xhr.status === 200) {
-			if(action === 'like') {
-				socialScoreHandler(tweet_id, xhr);  // Обработка <лайка\дизлайка>
-			} else if(action === 'unlike') {
-				socialScoreHandler(tweet_id, xhr);
-			} else if(action === 'retweet') {
-				retweetHandler(xhr);  // Обработка ретвита
+			if(action === 'socialscore') {
+				socialScoreHandler(tweet_id, xhr.response);  // Обработка <лайка\дизлайка>
+			} else if (action === 'retweet') {
+				retweetHandler(xhr.response);  // Обработка ретвита
 			}
+		} else if(xhr.status === 400) {
+			console.log('error: ', xhr.response);
 		}
 	});
 	xhr.send(data);
@@ -250,7 +249,7 @@ function loadTweetsToHTML() {
 
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = 'json';
-	const url = '/api/tweets/';
+	const url = 'api/tweets';
 	const method = 'GET';
 	xhr.open(method, url);
 	xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');

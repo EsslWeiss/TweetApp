@@ -3,7 +3,7 @@ from pathlib import Path
 
 from .tweet_settings import *
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # поднимаемся на уровень директории проекта
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1$355$-r!vgtey#(g0j8c6eqo+h4d*ht=p5l_5pu6$sy7ztc=h'
@@ -98,21 +98,32 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+# STATIC FILES SETTINGS
 STATIC_URL = '/static/'
+
+REACT_STATIC = str(BASE_DIR.joinpath('tweetapp-frontend').joinpath('build').joinpath('static'))  # path to react static files
+
+STATICFILES_DIRS = (
+	REACT_STATIC,
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static-root')
 
 # MEDIA SETTINGS
 MEDIA_URL = '/media/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
 
+# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # CORS SETTINGS
-
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'http://192.168.0.103:3000'
 ]
 

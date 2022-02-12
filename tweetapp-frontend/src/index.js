@@ -1,17 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import App from './App';
+import {TweetsComponent} from './tweets/baseComponents';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+
+const appElem = document.getElementById('root')
+if (appElem) {
+	ReactDOM.render(<App />, appElem)
+}
+const tweetsElem = document.getElementById('root')
+if (tweetsElem) {
+	ReactDOM.render(<TweetsComponent />, appElem)
+}
+
 reportWebVitals();

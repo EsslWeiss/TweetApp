@@ -15,18 +15,37 @@ function getCookie(name) {
     return cookieValue;
 }
 
-export function loadTweets(callback) {
+function lookup(method, endpoint, callback, data) {
+  let jsonData;
+  if (data) {
+    jsonData = JSON.stringify(data);
+  }
+
   const xhr = new XMLHttpRequest();	
   xhr.responseType = 'json';
-  const url = 'http://localhost:8000/api/tweets';  // URL to django backend
-  const method = 'GET';
-  xhr.open(method, url);
+  const url = `http://localhost:8000/api${endpoint}`;  // URL to django API endpoint
+  xhr.open(method, url)
+  const csrftoken = getCookie('csrftoken')
+  xhr.setRequestHeader('Content-Type', 'application/json')
+  if (csrftoken) {
+    xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest')
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'))
+  }
   xhr.onload  = () => {
-    callback(xhr.response, xhr.status)
+    return callback(xhr.response, xhr.status)
   }
   xhr.onerror = () => {
-    callback({message: 'the request was an error'}, 400)
+    return callback({message: 'the request was an error'}, 400)
   }
-  xhr.send();
+  xhr.send(jsonData)
+}
+
+export function loadTweets(callback) {
+  lookup('GET', '/tweets/', callback)
+}
+
+export function createTweet(newTweet, callback) {
+  lookup('POST', '/tweet/create/', callback, {text_content: newTweet})
 }
 
